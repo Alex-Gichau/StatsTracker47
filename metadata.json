@@ -1,0 +1,6 @@
+{
+  "name": "StatsTracker47",
+  "description": "Comprehensive YouTube & Google Meet Channel Analytics Intelligence Engine with accurate API telemetry, branding wallpaper and avatar ingestion, muted background process logs, and automated weekly email digests.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
