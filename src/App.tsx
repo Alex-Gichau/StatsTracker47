@@ -27,16 +27,36 @@ import { ChannelComparisonModal } from './components/ChannelComparisonModal';
 import { SendDigestModal } from './components/SendDigestModal';
 import { ApiKeysModal } from './components/ApiKeysModal';
 import { BackgroundProcessLogs } from './components/BackgroundProcessLogs';
+import { EmptyChannelState } from './components/EmptyChannelState';
 import { Toast, ToastNotification } from './components/Toast';
 import { generateWeeklyReport } from './utils/reportGenerator';
 
 export function App() {
-  // Channels state
-  const [channels, setChannels] = useState<ChannelData[]>(DEFAULT_CHANNELS);
-  const [activeChannelId, setActiveChannelId] = useState<string>(DEFAULT_CHANNELS[0].id);
+  // Channels state - persisted in localStorage
+  const [channels, setChannels] = useState<ChannelData[]>(() => {
+    try {
+      const saved = localStorage.getItem('statstracker47_channels');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return DEFAULT_CHANNELS;
+  });
+
+  const [activeChannelId, setActiveChannelId] = useState<string>(() => {
+    return channels[0]?.id || '';
+  });
+
+  // Sync channels to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('statstracker47_channels', JSON.stringify(channels));
+    } catch {}
+  }, [channels]);
 
   // Active Channel
-  const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
+  const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0] || null;
 
   // Dashboard Filters & Active View
   const [filterState, setFilterState] = useState<DashboardFilterState>({
@@ -48,20 +68,18 @@ export function App() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Report state
-  const [reportsMap, setReportsMap] = useState<Record<string, WeeklyReport>>({
-    [DEFAULT_CHANNELS[0].id]: DEFAULT_WEEKLY_REPORT
-  });
+  const [reportsMap, setReportsMap] = useState<Record<string, WeeklyReport>>({});
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   // API Keys & Telemetry State
   const [apiState, setApiState] = useState<ApiKeysState>({
-    youtubeApiKeyConfigured: true,
-    youtubeKeySource: 'env',
-    googleMeetApiKeyConfigured: true,
-    googleMeetKeySource: 'env',
-    youtubeQuotaUnitsUsed: 1420,
-    googleMeetSessionsCount: 18,
-    isLiveApiMode: true,
+    youtubeApiKeyConfigured: false,
+    youtubeKeySource: 'none',
+    googleMeetApiKeyConfigured: false,
+    googleMeetKeySource: 'none',
+    youtubeQuotaUnitsUsed: 0,
+    googleMeetSessionsCount: 0,
+    isLiveApiMode: false,
     customYoutubeKey: '',
     customGoogleMeetKey: ''
   });
@@ -72,39 +90,10 @@ export function App() {
   const [logs, setLogs] = useState<ProcessLog[]>([
     {
       id: 'log-boot-1',
-      timestamp: new Date(Date.now() - 42000).toISOString(),
+      timestamp: new Date().toISOString(),
       category: 'SYSTEM',
       level: 'info',
-      message: 'StatsTracker47 telemetry daemon initialized with strict API accuracy mode'
-    },
-    {
-      id: 'log-boot-2',
-      timestamp: new Date(Date.now() - 38000).toISOString(),
-      category: 'API',
-      level: 'success',
-      message: 'YouTube Data API v3 verified: quota bucket active (1,420 / 10,000 units)',
-      details: { quotaLimit: 10000, quotaUsed: 1420 }
-    },
-    {
-      id: 'log-boot-3',
-      timestamp: new Date(Date.now() - 32000).toISOString(),
-      category: 'BRANDING',
-      level: 'info',
-      message: 'Resolved high-resolution wallpaper banner (2560x1440) and avatar asset cache for @mkbhd'
-    },
-    {
-      id: 'log-boot-4',
-      timestamp: new Date(Date.now() - 25000).toISOString(),
-      category: 'MEET',
-      level: 'success',
-      message: 'Google Meet API connected: 18 creator consultation events and stream telemetry synchronized'
-    },
-    {
-      id: 'log-boot-5',
-      timestamp: new Date(Date.now() - 12000).toISOString(),
-      category: 'TELEMETRY',
-      level: 'info',
-      message: '30-day view velocity & retention curve calculated: 19.1M subs, +28K 7d velocity'
+      message: 'StatsTracker47 telemetry daemon initialized'
     }
   ]);
 
@@ -137,19 +126,7 @@ export function App() {
     alertOnSpikes: true,
   });
 
-  const [deliveryLogs, setDeliveryLogs] = useState<EmailDeliveryLog[]>([
-    {
-      id: 'log-prev-1',
-      trackingId: 'ST47-RPT-89421',
-      channelId: DEFAULT_CHANNELS[0].id,
-      channelTitle: DEFAULT_CHANNELS[0].title,
-      recipientEmail: 'creator@gmail.com',
-      sentAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      subject: `Weekly Performance Report: ${DEFAULT_CHANNELS[0].title}`,
-      status: 'DELIVERED',
-      performanceScore: 94
-    }
-  ]);
+  const [deliveryLogs, setDeliveryLogs] = useState<EmailDeliveryLog[]>([]);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [isSavingSchedule, setIsSavingSchedule] = useState(false);
 
@@ -177,7 +154,7 @@ export function App() {
       .then(data => {
         if (data) {
           setApiState(prev => ({ ...prev, ...data }));
-          addProcessLog('Ingested active API configuration from server environment (.env)', 'API', 'info', data);
+          addProcessLog('Ingested active API configuration from server environment', 'API', 'info', data);
         }
       })
       .catch(() => {});
@@ -228,18 +205,19 @@ export function App() {
   // Trigger Meet Sync
   const handleTriggerMeetSync = async () => {
     setIsMeetSyncing(true);
-    addProcessLog(`Triggered Google Meet API live telemetry sync for @${activeChannel.handle}`, 'MEET', 'info');
+    addProcessLog(`Triggered Google Meet API live telemetry sync`, 'MEET', 'info');
     setTimeout(() => {
       setIsMeetSyncing(false);
-      addProcessLog(`Google Meet telemetry synchronized: 3 consultations, 14.5 meeting hours recorded`, 'MEET', 'success');
+      addProcessLog(`Google Meet telemetry synchronized with Google Calendar`, 'MEET', 'success');
       addToast('Google Meet creator telemetry successfully updated!', 'success');
     }, 1200);
   };
 
   // Generate or retrieve current report for active channel
-  const currentReport = reportsMap[activeChannel.id] || null;
+  const currentReport = activeChannel ? (reportsMap[activeChannel.id] || null) : null;
 
   const handleGenerateReport = async () => {
+    if (!activeChannel) return;
     setIsGeneratingReport(true);
     addToast(`Analyzing 7-day velocity for ${activeChannel.title}...`, 'info');
     addProcessLog(`Analyzing 7-day algorithmic velocity & engagement scores for ${activeChannel.title}`, 'AI', 'info');
@@ -276,6 +254,7 @@ export function App() {
   };
 
   const handleSendEmailReport = async (email: string) => {
+    if (!activeChannel) return;
     setIsSendingEmail(true);
     const reportToSend = currentReport || generateWeeklyReport(activeChannel);
     addProcessLog(`Dispatching weekly email digest to ${email}...`, 'SYSTEM', 'info');
@@ -460,74 +439,106 @@ export function App() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-28">
           
-          {/* Channel Hero Summary */}
-          <ChannelHero
-            channel={activeChannel}
-            onGenerateReport={() => {
-              setFilterState(prev => ({ ...prev, activeTab: 'reports' }));
-              handleGenerateReport();
-            }}
-            onOpenSchedule={() => setFilterState(prev => ({ ...prev, activeTab: 'schedule' }))}
-            onSendDigest={() => setIsSendDigestOpen(true)}
-          />
+          {/* If No Channel Tracked Yet */}
+          {!activeChannel ? (
+            filterState.activeTab === 'meet' ? (
+              <GoogleMeetView
+                channel={null}
+                apiState={apiState}
+                onOpenKeysModal={() => setIsKeysModalOpen(true)}
+                onTriggerSync={handleTriggerMeetSync}
+                isSyncing={isMeetSyncing}
+              />
+            ) : filterState.activeTab === 'schedule' ? (
+              <EmailScheduleView
+                schedule={emailSchedule}
+                logs={deliveryLogs}
+                onUpdateSchedule={handleUpdateSchedule}
+                onSendTestDigest={handleSendEmailReport}
+                isSaving={isSavingSchedule}
+                isSending={isSendingEmail}
+                onShowToast={addToast}
+              />
+            ) : (
+              <EmptyChannelState
+                onAddChannel={handleAddChannel}
+                onOpenKeysModal={() => setIsKeysModalOpen(true)}
+                apiState={apiState}
+                onLogEmit={addProcessLog}
+              />
+            )
+          ) : (
+            <>
+              {/* Channel Hero Summary */}
+              <ChannelHero
+                channel={activeChannel}
+                onGenerateReport={() => {
+                  setFilterState(prev => ({ ...prev, activeTab: 'reports' }));
+                  handleGenerateReport();
+                }}
+                onOpenSchedule={() => setFilterState(prev => ({ ...prev, activeTab: 'schedule' }))}
+                onSendDigest={() => setIsSendDigestOpen(true)}
+              />
 
-          {/* Dynamic Tab Views */}
-          {filterState.activeTab === 'overview' && (
-            <OverviewDashboard
-              channel={activeChannel}
-              filterState={filterState}
-              onTimeframeChange={(tf) => setFilterState(prev => ({ ...prev, timeframe: tf }))}
-              onNavigateToReports={() => setFilterState(prev => ({ ...prev, activeTab: 'reports' }))}
-              onSendDigest={() => setIsSendDigestOpen(true)}
-              latestReport={currentReport}
-            />
-          )}
+              {/* Dynamic Tab Views */}
+              {filterState.activeTab === 'overview' && (
+                <OverviewDashboard
+                  channel={activeChannel}
+                  filterState={filterState}
+                  onTimeframeChange={(tf) => setFilterState(prev => ({ ...prev, timeframe: tf }))}
+                  onNavigateToReports={() => setFilterState(prev => ({ ...prev, activeTab: 'reports' }))}
+                  onSendDigest={() => setIsSendDigestOpen(true)}
+                  latestReport={currentReport}
+                />
+              )}
 
-          {filterState.activeTab === 'growth' && (
-            <GrowthTrendsDashboard channel={activeChannel} />
-          )}
+              {filterState.activeTab === 'growth' && (
+                <GrowthTrendsDashboard channel={activeChannel} />
+              )}
 
-          {filterState.activeTab === 'engagement' && (
-            <EngagementDashboard channel={activeChannel} />
-          )}
+              {filterState.activeTab === 'engagement' && (
+                <EngagementDashboard channel={activeChannel} />
+              )}
 
-          {filterState.activeTab === 'reports' && (
-            <WeeklyReportsView
-              channel={activeChannel}
-              report={currentReport}
-              onGenerateNewReport={handleGenerateReport}
-              onSendEmailReport={handleSendEmailReport}
-              isGenerating={isGeneratingReport}
-              isSending={isSendingEmail}
-              defaultEmail={emailSchedule.recipientEmail}
-              onShowToast={addToast}
-            />
-          )}
+              {filterState.activeTab === 'reports' && (
+                <WeeklyReportsView
+                  channel={activeChannel}
+                  report={currentReport}
+                  onGenerateNewReport={handleGenerateReport}
+                  onSendEmailReport={handleSendEmailReport}
+                  isGenerating={isGeneratingReport}
+                  isSending={isSendingEmail}
+                  defaultEmail={emailSchedule.recipientEmail}
+                  onShowToast={addToast}
+                />
+              )}
 
-          {filterState.activeTab === 'videos' && (
-            <VideoPerformanceList videos={activeChannel.recentVideos || []} />
-          )}
+              {filterState.activeTab === 'videos' && (
+                <VideoPerformanceList videos={activeChannel.recentVideos || []} />
+              )}
 
-          {filterState.activeTab === 'meet' && (
-            <GoogleMeetView
-              channel={activeChannel}
-              apiState={apiState}
-              onOpenKeysModal={() => setIsKeysModalOpen(true)}
-              onTriggerSync={handleTriggerMeetSync}
-              isSyncing={isMeetSyncing}
-            />
-          )}
+              {filterState.activeTab === 'meet' && (
+                <GoogleMeetView
+                  channel={activeChannel}
+                  apiState={apiState}
+                  onOpenKeysModal={() => setIsKeysModalOpen(true)}
+                  onTriggerSync={handleTriggerMeetSync}
+                  isSyncing={isMeetSyncing}
+                />
+              )}
 
-          {filterState.activeTab === 'schedule' && (
-            <EmailScheduleView
-              schedule={emailSchedule}
-              logs={deliveryLogs}
-              onUpdateSchedule={handleUpdateSchedule}
-              onSendTestDigest={handleSendEmailReport}
-              isSaving={isSavingSchedule}
-              isSending={isSendingEmail}
-              onShowToast={addToast}
-            />
+              {filterState.activeTab === 'schedule' && (
+                <EmailScheduleView
+                  schedule={emailSchedule}
+                  logs={deliveryLogs}
+                  onUpdateSchedule={handleUpdateSchedule}
+                  onSendTestDigest={handleSendEmailReport}
+                  isSaving={isSavingSchedule}
+                  isSending={isSendingEmail}
+                  onShowToast={addToast}
+                />
+              )}
+            </>
           )}
 
           {/* Footer inside scroll view */}
@@ -567,15 +578,17 @@ export function App() {
         channels={channels}
       />
 
-      <SendDigestModal
-        isOpen={isSendDigestOpen}
-        onClose={() => setIsSendDigestOpen(false)}
-        channel={activeChannel}
-        report={currentReport}
-        onSend={(email) => handleSendEmailReport(email)}
-        defaultEmail={emailSchedule.recipientEmail}
-        isSending={isSendingEmail}
-      />
+      {activeChannel && (
+        <SendDigestModal
+          isOpen={isSendDigestOpen}
+          onClose={() => setIsSendDigestOpen(false)}
+          channel={activeChannel}
+          report={currentReport}
+          onSend={(email) => handleSendEmailReport(email)}
+          defaultEmail={emailSchedule.recipientEmail}
+          isSending={isSendingEmail}
+        />
+      )}
 
       <ApiKeysModal
         isOpen={isKeysModalOpen}
@@ -592,6 +605,5 @@ export function App() {
     </div>
   );
 }
+
 export default App;
-
-

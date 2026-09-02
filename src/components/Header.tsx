@@ -22,7 +22,7 @@ import { ChannelData, DashboardFilterState, ApiKeysState } from '../types';
 
 interface HeaderProps {
   channels: ChannelData[];
-  activeChannel: ChannelData;
+  activeChannel?: ChannelData | null;
   onSelectChannel: (channel: ChannelData) => void;
   onOpenAddModal: () => void;
   onOpenSendDigestModal: () => void;
@@ -91,10 +91,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Active channel indicator chip on medium screens */}
-          <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-[#dadce0] text-xs text-[#5f6368]">
-            <img src={activeChannel.avatarUrl} alt={activeChannel.title} className="w-5 h-5 rounded-full object-cover border border-[#dadce0]" />
-            <span className="font-medium text-[#202124] max-w-[120px] truncate">{activeChannel.title}</span>
-          </div>
+          {activeChannel && (
+            <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-[#dadce0] text-xs text-[#5f6368]">
+              <img src={activeChannel.avatarUrl} alt={activeChannel.title} className="w-5 h-5 rounded-full object-cover border border-[#dadce0]" />
+              <span className="font-medium text-[#202124] max-w-[120px] truncate">{activeChannel.title}</span>
+            </div>
+          )}
         </div>
 
         {/* Center: Sleek Google Search Bar */}
@@ -157,20 +159,30 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Channel Switcher Dropdown */}
           <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#3c4043] bg-white hover:bg-[#f8f9fa] border border-[#dadce0] rounded-lg transition-all shadow-2xs"
-            >
-              <img
-                src={activeChannel.avatarUrl}
-                alt={activeChannel.title}
-                className="w-4 h-4 rounded-full object-cover border border-[#dadce0]"
-              />
-              <span className="max-w-[90px] sm:max-w-[130px] truncate">{activeChannel.title}</span>
-              <ChevronDown className="w-3 h-3 text-[#5f6368]" />
-            </button>
+            {activeChannel ? (
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#3c4043] bg-white hover:bg-[#f8f9fa] border border-[#dadce0] rounded-lg transition-all shadow-2xs"
+              >
+                <img
+                  src={activeChannel.avatarUrl}
+                  alt={activeChannel.title}
+                  className="w-4 h-4 rounded-full object-cover border border-[#dadce0]"
+                />
+                <span className="max-w-[90px] sm:max-w-[130px] truncate">{activeChannel.title}</span>
+                <ChevronDown className="w-3 h-3 text-[#5f6368]" />
+              </button>
+            ) : (
+              <button
+                onClick={onOpenAddModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#1a73e8] bg-[#e8f0fe] hover:bg-[#d2e3fc] border border-[#d2e3fc] rounded-lg transition-all shadow-2xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Track Channel</span>
+              </button>
+            )}
 
-            {dropdownOpen && (
+            {dropdownOpen && activeChannel && (
               <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-[#dadce0] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="px-3 py-2 border-b border-[#dadce0] text-xs font-bold text-[#70757a] uppercase tracking-wider flex items-center justify-between">
                   <span>Tracked Channels</span>

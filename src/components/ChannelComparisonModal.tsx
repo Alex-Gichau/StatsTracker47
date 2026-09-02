@@ -8,7 +8,8 @@ import {
   Percent, 
   Film,
   Sparkles,
-  Check
+  Check,
+  Plus
 } from 'lucide-react';
 import { ChannelData } from '../types';
 import { formatCompactNumber } from '../utils/formatters';
@@ -28,6 +29,33 @@ export const ChannelComparisonModal: React.FC<ChannelComparisonModalProps> = ({
   const [selectedChannelB, setSelectedChannelB] = useState<string>(channels[1]?.id || channels[0]?.id || '');
 
   if (!isOpen) return null;
+
+  if (channels.length < 2) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+        <div 
+          className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 overflow-hidden p-6 space-y-4 text-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#1a73e8] mx-auto flex items-center justify-center">
+            <Scale className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-gray-900">Compare YouTube Channels</h3>
+          <p className="text-xs text-gray-500">
+            You currently have {channels.length} {channels.length === 1 ? 'channel' : 'channels'} tracked. Add at least two channels to benchmark growth velocity, subscriber momentum, and engagement side-by-side.
+          </p>
+          <div className="pt-2 flex justify-center gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const chA = channels.find(c => c.id === selectedChannelA) || channels[0];
   const chB = channels.find(c => c.id === selectedChannelB) || channels[1] || channels[0];

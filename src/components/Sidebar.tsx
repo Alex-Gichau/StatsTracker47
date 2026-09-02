@@ -15,7 +15,7 @@ import { ChannelData, DashboardFilterState } from '../types';
 
 interface SidebarProps {
   channels: ChannelData[];
-  activeChannel: ChannelData;
+  activeChannel?: ChannelData | null;
   onSelectChannel: (channel: ChannelData) => void;
   onOpenAddModal: () => void;
   onOpenCompareModal: () => void;
@@ -84,31 +84,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="space-y-0.5">
-            {channels.map((ch, idx) => {
-              const isSelected = ch.id === activeChannel.id;
-              const dotColors = ['bg-green-500', 'bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-rose-500'];
-              const dotColor = dotColors[idx % dotColors.length];
-
-              return (
+            {channels.length === 0 ? (
+              <div className="px-2 py-3 text-center bg-[#f8f9fa] rounded-lg border border-[#dadce0] my-1">
+                <p className="text-[11px] text-[#5f6368]">No channels tracked</p>
                 <button
-                  key={ch.id}
-                  onClick={() => onSelectChannel(ch)}
-                  className={`w-[calc(100%+16px)] px-4 py-2 rounded-r-full -ml-4 flex items-center justify-between text-xs transition-colors text-left group ${
-                    isSelected
-                      ? 'bg-[#f1f3f4] text-[#202124] font-medium'
-                      : 'text-[#5f6368] hover:bg-[#f8f9fa] hover:text-[#202124]'
-                  }`}
+                  onClick={onOpenAddModal}
+                  className="mt-1 text-xs text-[#1a73e8] font-medium hover:underline"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
-                    <span className="truncate font-medium">{ch.title}</span>
-                  </div>
-                  <span className="text-[10px] text-[#70757a] font-mono shrink-0 ml-1">
-                    {ch.subscribersFormatted}
-                  </span>
+                  + Ingest URL
                 </button>
-              );
-            })}
+              </div>
+            ) : (
+              channels.map((ch, idx) => {
+                const isSelected = activeChannel && ch.id === activeChannel.id;
+                const dotColors = ['bg-green-500', 'bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-rose-500'];
+                const dotColor = dotColors[idx % dotColors.length];
+
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => onSelectChannel(ch)}
+                    className={`w-[calc(100%+16px)] px-4 py-2 rounded-r-full -ml-4 flex items-center justify-between text-xs transition-colors text-left group ${
+                      isSelected
+                        ? 'bg-[#f1f3f4] text-[#202124] font-medium'
+                        : 'text-[#5f6368] hover:bg-[#f8f9fa] hover:text-[#202124]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+                      <span className="truncate font-medium">{ch.title}</span>
+                    </div>
+                    <span className="text-[10px] text-[#70757a] font-mono shrink-0 ml-1">
+                      {ch.subscribersFormatted}
+                    </span>
+                  </button>
+                );
+              })
+            )}
           </div>
 
           <button

@@ -17,29 +17,16 @@ let customKeys = {
   googleMeetApiKey: ''
 };
 
-let youtubeQuotaUsed = 1420;
-let meetSessionsCount = 18;
+let youtubeQuotaUsed = 0;
+let meetSessionsCount = 0;
 
 // In-memory store for email logs and schedule
-let emailLogsStore: any[] = [
-  {
-    id: 'log-1',
-    trackingId: 'YT-RPT-77492',
-    channelTitle: 'Marques Brownlee',
-    recipientEmail: 'gichaumburu@gmail.com',
-    subject: '📊 Weekly Channel Digest: Marques Brownlee Performance (Aug 25 – Sep 1, 2026)',
-    sentAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'DELIVERED',
-    reportWeek: 'Aug 25 – Sep 1, 2026',
-    performanceScore: 92,
-    openCount: 2
-  }
-];
+let emailLogsStore: any[] = [];
 
 let emailScheduleStore = {
   id: 'sched-1',
-  channelId: 'mkbhd',
-  recipientEmail: 'gichaumburu@gmail.com',
+  channelId: '',
+  recipientEmail: 'creator@gmail.com',
   frequency: 'weekly',
   dayOfWeek: 'Monday',
   timeUtc: '09:00',
@@ -49,8 +36,8 @@ let emailScheduleStore = {
   alertOnSpikes: true,
   spikeThresholdPercent: 20,
   isActive: true,
-  lastSentAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  nextScheduledAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString()
+  lastSentAt: null,
+  nextScheduledAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 };
 
 // Helper to get active YouTube API Key

@@ -15,7 +15,7 @@ import { ChannelData, WeeklyReport } from '../types';
 interface SendDigestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  channel: ChannelData;
+  channel?: ChannelData | null;
   report: WeeklyReport | null;
   onSend: (email: string, format: string) => Promise<void>;
   defaultEmail?: string;
@@ -35,7 +35,7 @@ export const SendDigestModal: React.FC<SendDigestModalProps> = ({
   const [format, setFormat] = useState<'rich-html' | 'compact-summary'>('rich-html');
   const [isDone, setIsDone] = useState(false);
 
-  if (!isOpen) return null;
+  if (!isOpen || !channel) return null;
 
   const handleSend = async () => {
     if (!email.trim()) return;
