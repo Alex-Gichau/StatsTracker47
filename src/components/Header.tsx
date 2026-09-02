@@ -34,6 +34,8 @@ interface HeaderProps {
   userEmail?: string;
   isMobileSidebarOpen?: boolean;
   onToggleMobileSidebar?: () => void;
+  isSidebarCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -49,7 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
   onTabChange,
   userEmail = 'creator@gmail.com',
   isMobileSidebarOpen,
-  onToggleMobileSidebar
+  onToggleMobileSidebar,
+  isSidebarCollapsed = false,
+  onToggleCollapse,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -70,17 +74,24 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-40 bg-white border-b border-[#dadce0] px-4 sm:px-6 py-2.5">
       <div className="flex items-center justify-between gap-3 sm:gap-4">
         
-        {/* Left: Brand Logo & Mobile Toggle */}
+        {/* Left: Brand Logo & Sidenav Toggle */}
         <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-          {onToggleMobileSidebar && (
-            <button
-              onClick={onToggleMobileSidebar}
-              className="md:hidden p-1.5 text-[#5f6368] hover:bg-[#f1f3f4] rounded-lg"
-              title="Toggle Menu"
-            >
-              {isMobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          )}
+          
+          {/* Sidenav Hamburger Toggle: Mobile opens drawer, Desktop toggles collapse */}
+          <button
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                onToggleMobileSidebar?.();
+              } else {
+                onToggleCollapse?.();
+              }
+            }}
+            className="p-1.5 text-[#5f6368] hover:text-[#202124] hover:bg-[#f1f3f4] rounded-lg transition-colors cursor-pointer"
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label="Toggle navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
           <div className="flex items-center text-[#1a73e8] font-bold text-lg sm:text-xl tracking-tight">
             <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center mr-2 shadow-2xs">

@@ -25,6 +25,16 @@ interface BackgroundProcessLogsProps {
   isAnalyzing?: boolean;
 }
 
+const formatLogDetails = (details: any): string => {
+  if (!details) return '';
+  if (typeof details === 'string') return details;
+  try {
+    return JSON.stringify(details);
+  } catch {
+    return String(details);
+  }
+};
+
 export const BackgroundProcessLogs: React.FC<BackgroundProcessLogsProps> = ({
   logs,
   onClearLogs,
@@ -46,14 +56,15 @@ export const BackgroundProcessLogs: React.FC<BackgroundProcessLogsProps> = ({
 
   const filteredLogs = logs.filter(log => {
     const matchesCategory = selectedCategory === 'ALL' || log.category === selectedCategory;
+    const detailsStr = formatLogDetails(log.details);
     const matchesSearch = searchQuery === '' || 
       log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (log.details && log.details.toLowerCase().includes(searchQuery.toLowerCase()));
+      detailsStr.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   const handleCopyLogs = () => {
-    const logText = filteredLogs.map(l => `[${l.timestamp}] [${l.category}] [${l.level.toUpperCase()}] ${l.message} ${l.details || ''}`).join('\n');
+    const logText = filteredLogs.map(l => `[${l.timestamp}] [${l.category}] [${l.level.toUpperCase()}] ${l.message} ${formatLogDetails(l.details)}`).join('\n');
     navigator.clipboard.writeText(logText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -216,8 +227,8 @@ export const BackgroundProcessLogs: React.FC<BackgroundProcessLogsProps> = ({
                       {log.message}
                     </span>
                     {log.details && (
-                      <span className="text-[#9aa0a6] block text-[10px] mt-0.5 break-all">
-                        {log.details}
+                      <span className="text-[#9aa0a6] block text-[10px] mt-0.5 break-all font-mono opacity-80">
+                        {typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}
                       </span>
                     )}
                   </div>

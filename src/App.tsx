@@ -66,6 +66,20 @@ export function App() {
   });
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('statstracker47_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Sync sidebar collapse to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('statstracker47_sidebar_collapsed', String(isSidebarCollapsed));
+    } catch {}
+  }, [isSidebarCollapsed]);
 
   // Report state
   const [reportsMap, setReportsMap] = useState<Record<string, WeeklyReport>>({});
@@ -374,6 +388,8 @@ export function App() {
         }}
         isMobileSidebarOpen={isMobileSidebarOpen}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(prev => !prev)}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
       />
 
       {/* Main Container with Sidebar + Content */}
@@ -395,6 +411,8 @@ export function App() {
             onOpenCompareModal={() => setIsCompareOpen(true)}
             activeTab={filterState.activeTab}
             onTabChange={(tab) => setFilterState(prev => ({ ...prev, activeTab: tab }))}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
           />
         </div>
 

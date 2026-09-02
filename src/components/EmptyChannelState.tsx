@@ -42,7 +42,7 @@ export const EmptyChannelState: React.FC<EmptyChannelStateProps> = ({
       const response = await fetch('/api/channel/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelUrl: rawInput })
+        body: JSON.stringify({ url: rawInput })
       });
 
       const data = await response.json();

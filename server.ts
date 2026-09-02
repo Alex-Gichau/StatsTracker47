@@ -141,12 +141,12 @@ app.post('/api/keys/test', async (req, res) => {
 // 1. Channel Lookup / Scrape / Real YouTube Data API Resolver
 app.post('/api/channel/lookup', async (req, res) => {
   try {
-    const { url } = req.body;
-    if (!url || typeof url !== 'string') {
+    const rawInput = req.body.url || req.body.channelUrl || req.body.handle;
+    if (!rawInput || typeof rawInput !== 'string') {
       return res.status(400).json({ error: 'YouTube URL or handle is required' });
     }
 
-    const trimmed = url.trim();
+    const trimmed = rawInput.trim();
     const handleClean = trimmed
       .replace(/^https?:\/\/(www\.)?youtube\.com\/@?/i, '')
       .replace(/^@/, '')
