@@ -165,11 +165,11 @@ export const EmptyChannelState: React.FC<EmptyChannelStateProps> = ({
         {/* API Key Status Bar */}
         <div className="pt-4 border-t border-[#dadce0] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5f6368]">
           <div className="flex items-center gap-2">
-            <ShieldCheck className={`w-4 h-4 ${apiState.youtubeApiKeyConfigured ? 'text-[#137333]' : 'text-[#f29900]'}`} />
+            <ShieldCheck className={`w-4 h-4 ${apiState.youtubeAnalyticsConnected ? 'text-[#137333]' : 'text-[#f29900]'}`} />
             <span>
-              {apiState.youtubeApiKeyConfigured 
-                ? 'YouTube Data API v3 Connected (Environment Key Active)' 
-                : 'Using algorithmic parser mode'}
+              {apiState.youtubeAnalyticsConnected 
+                ? 'YouTube Analytics API v2 Connected (OAuth Verified)' 
+                : 'YouTube Analytics OAuth Standby'}
             </span>
           </div>
 
@@ -178,7 +178,7 @@ export const EmptyChannelState: React.FC<EmptyChannelStateProps> = ({
             className="px-3 py-1 bg-white hover:bg-[#f8f9fa] border border-[#dadce0] text-[#1a73e8] font-medium rounded-md shadow-2xs transition-colors flex items-center gap-1.5"
           >
             <Key className="w-3.5 h-3.5" />
-            <span>Configure Custom API Keys</span>
+            <span>Configure YouTube Analytics Settings</span>
           </button>
         </div>
 

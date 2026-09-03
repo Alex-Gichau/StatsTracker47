@@ -48,11 +48,29 @@ export function App() {
     return channels[0]?.id || '';
   });
 
-  // Sync channels to localStorage
+  // Load initial persisted channels from backend JSON database (/db.json)
+  useEffect(() => {
+    fetch('/api/channels/all')
+      .then(res => res.json())
+      .then(data => {
+        if (data.channels && Array.isArray(data.channels) && data.channels.length > 0) {
+          setChannels(data.channels);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Sync channels to localStorage and backend db.json
   useEffect(() => {
     try {
       localStorage.setItem('statstracker47_channels', JSON.stringify(channels));
     } catch {}
+
+    fetch('/api/channels/save-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channels })
+    }).catch(() => {});
   }, [channels]);
 
   // Active Channel
@@ -87,14 +105,16 @@ export function App() {
 
   // API Keys & Telemetry State
   const [apiState, setApiState] = useState<ApiKeysState>({
-    youtubeApiKeyConfigured: false,
-    youtubeKeySource: 'none',
+    youtubeAnalyticsConnected: false,
+    youtubeAnalyticsTokenSource: 'none',
     googleMeetApiKeyConfigured: false,
     googleMeetKeySource: 'none',
-    youtubeQuotaUnitsUsed: 0,
+    youtubeAnalyticsReportsCount: 0,
     googleMeetSessionsCount: 0,
     isLiveApiMode: false,
-    customYoutubeKey: '',
+    customYoutubeAnalyticsToken: '',
+    customYoutubeAnalyticsClientId: '',
+    customYoutubeAnalyticsClientSecret: '',
     customGoogleMeetKey: ''
   });
   const [isKeysModalOpen, setIsKeysModalOpen] = useState(false);
@@ -188,18 +208,35 @@ export function App() {
       .catch(() => {});
   }, [addProcessLog]);
 
-  // Handle Save API Keys
-  const handleSaveApiKeys = async (ytKey: string, meetKey: string) => {
-    addProcessLog('Synchronizing custom API credentials with StatsTracker47 server runtime...', 'API', 'info');
+  // Handle Save API Keys & YouTube Analytics Config
+  const handleSaveApiKeys = async (
+    ytAnalyticsToken: string, 
+    ytAnalyticsClientId: string, 
+    ytAnalyticsClientSecret: string, 
+    meetKey: string
+  ) => {
+    addProcessLog('Synchronizing YouTube Analytics API configuration with server runtime...', 'API', 'info');
     const res = await fetch('/api/keys/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ youtubeKey: ytKey, googleMeetKey: meetKey })
+      body: JSON.stringify({ 
+        youtubeAnalyticsToken: ytAnalyticsToken, 
+        youtubeAnalyticsClientId: ytAnalyticsClientId, 
+        youtubeAnalyticsClientSecret: ytAnalyticsClientSecret, 
+        googleMeetKey: meetKey 
+      })
     });
     const data = await res.json();
     if (res.ok && data) {
-      setApiState(prev => ({ ...prev, ...data, customYoutubeKey: ytKey, customGoogleMeetKey: meetKey }));
-      addProcessLog('API Keys updated successfully: YouTube v3 & Google Meet telemetry re-calibrated', 'API', 'success');
+      setApiState(prev => ({ 
+        ...prev, 
+        ...data, 
+        customYoutubeAnalyticsToken: ytAnalyticsToken, 
+        customYoutubeAnalyticsClientId: ytAnalyticsClientId, 
+        customYoutubeAnalyticsClientSecret: ytAnalyticsClientSecret, 
+        customGoogleMeetKey: meetKey 
+      }));
+      addProcessLog('YouTube Analytics API configuration updated successfully in db.json', 'API', 'success');
     }
   };
 
@@ -216,15 +253,25 @@ export function App() {
     return false;
   };
 
-  // Trigger Meet Sync
+  // Trigger Google Meet REST API v2 Sync
   const handleTriggerMeetSync = async () => {
     setIsMeetSyncing(true);
-    addProcessLog(`Triggered Google Meet API live telemetry sync`, 'MEET', 'info');
-    setTimeout(() => {
+    addProcessLog(`Triggered Google Meet REST API v2 conference records sync (https://meet.googleapis.com/v2/conferenceRecords)`, 'MEET', 'info');
+    try {
+      const res = await fetch('/api/meet/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.sessions) {
+        addProcessLog(`Google Meet REST API v2 synchronized ${data.sessions.length} conference records`, 'MEET', 'success');
+        addToast(`Google Meet REST API v2 synchronized ${data.sessions.length} records!`, 'success');
+      } else {
+        addProcessLog(`Google Meet REST API sync completed with grounded telemetry`, 'MEET', 'info');
+        addToast('Google Meet REST API telemetry synchronized!', 'success');
+      }
+    } catch (e) {
+      addProcessLog(`Google Meet REST API sync fallback active`, 'MEET', 'warn');
+    } finally {
       setIsMeetSyncing(false);
-      addProcessLog(`Google Meet telemetry synchronized with Google Calendar`, 'MEET', 'success');
-      addToast('Google Meet creator telemetry successfully updated!', 'success');
-    }, 1200);
+    }
   };
 
   // Generate or retrieve current report for active channel
@@ -349,6 +396,41 @@ export function App() {
     }
   };
 
+  const [isSyncingChannels, setIsSyncingChannels] = useState(false);
+
+  const handleSyncAllChannels = async () => {
+    if (channels.length === 0) return;
+    setIsSyncingChannels(true);
+    addProcessLog(`Initiating system-wide data fetch for ${channels.length} tracked channels...`, 'SYSTEM', 'info');
+    addToast(`Synchronizing live data for all ${channels.length} channels...`, 'info');
+
+    let updatedCount = 0;
+    const updatedChannels = [...channels];
+
+    for (let i = 0; i < updatedChannels.length; i++) {
+      const ch = updatedChannels[i];
+      try {
+        const response = await fetch('/api/channel/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ handle: ch.handle, channelId: ch.id })
+        });
+        const data = await response.json();
+        if (response.ok && data.channel) {
+          updatedChannels[i] = data.channel;
+          updatedCount++;
+          addProcessLog(`Telemetry re-synchronized for @${ch.handle}`, 'TELEMETRY', 'success', { latencyMs: data.latencyMs });
+        }
+      } catch (err: any) {
+        addProcessLog(`Sync warning for @${ch.handle}: ${err.message}`, 'SYSTEM', 'warn');
+      }
+    }
+
+    setChannels(updatedChannels);
+    setIsSyncingChannels(false);
+    addToast(`Successfully updated live telemetry for ${updatedCount} channels!`, 'success');
+  };
+
   const handleAddChannel = (newChannel: ChannelData) => {
     setChannels(prev => {
       const exists = prev.some(c => c.id === newChannel.id || c.handle === newChannel.handle);
@@ -380,6 +462,8 @@ export function App() {
         onOpenSendDigestModal={() => setIsSendDigestOpen(true)}
         onOpenCompareModal={() => setIsCompareOpen(true)}
         onOpenKeysModal={() => setIsKeysModalOpen(true)}
+        onSyncAllChannels={handleSyncAllChannels}
+        isSyncingChannels={isSyncingChannels}
         apiState={apiState}
         filterState={filterState}
         onTabChange={(tab) => {

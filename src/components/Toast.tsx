@@ -60,13 +60,6 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onClose }) => {
         <X className="w-4 h-4" />
       </button>
 
-      {/* Auto-dismiss subtle progress line */}
-      <motion.div
-        initial={{ width: '100%' }}
-        animate={{ width: '0%' }}
-        transition={{ duration: duration / 1000, ease: 'linear' }}
-        className="absolute bottom-0 left-0 h-0.5 bg-[#1a73e8]/60"
-      />
     </motion.div>
   );
 };

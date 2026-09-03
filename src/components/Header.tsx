@@ -16,7 +16,8 @@ import {
   X,
   Key,
   Radio,
-  ShieldCheck
+  ShieldCheck,
+  RefreshCw
 } from 'lucide-react';
 import { ChannelData, DashboardFilterState, ApiKeysState } from '../types';
 
@@ -28,6 +29,8 @@ interface HeaderProps {
   onOpenSendDigestModal: () => void;
   onOpenCompareModal: () => void;
   onOpenKeysModal: () => void;
+  onSyncAllChannels?: () => void;
+  isSyncingChannels?: boolean;
   apiState: ApiKeysState;
   filterState: DashboardFilterState;
   onTabChange: (tab: DashboardFilterState['activeTab']) => void;
@@ -46,6 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSendDigestModal,
   onOpenCompareModal,
   onOpenKeysModal,
+  onSyncAllChannels,
+  isSyncingChannels = false,
   apiState,
   filterState,
   onTabChange,
@@ -144,17 +149,17 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onOpenKeysModal}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all shadow-2xs ${
-              apiState.youtubeApiKeyConfigured 
+              apiState.youtubeAnalyticsConnected 
                 ? 'bg-[#e6f4ea] text-[#137333] border-[#ceead6] hover:bg-[#ceead6]' 
                 : 'bg-white text-[#3c4043] border-[#dadce0] hover:bg-[#f8f9fa]'
             }`}
-            title="Configure YouTube & Google Meet API Keys"
+            title="Configure YouTube Analytics & Google Meet API Keys"
           >
             <Key className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">
-              {apiState.youtubeApiKeyConfigured ? 'API Connected' : 'API Keys'}
+              {apiState.youtubeAnalyticsConnected ? 'Analytics Connected' : 'Analytics API'}
             </span>
-            {apiState.youtubeApiKeyConfigured && (
+            {apiState.youtubeAnalyticsConnected && (
               <span className="w-1.5 h-1.5 rounded-full bg-[#137333] animate-pulse" />
             )}
           </button>
@@ -167,6 +172,23 @@ export const Header: React.FC<HeaderProps> = ({
             <Scale className="w-3.5 h-3.5" />
             <span>Compare</span>
           </button>
+
+          {/* Sync All Channels Button */}
+          {onSyncAllChannels && (
+            <button
+              onClick={onSyncAllChannels}
+              disabled={isSyncingChannels}
+              className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors border border-[#dadce0] ${
+                isSyncingChannels
+                  ? 'bg-[#f1f3f4] text-[#80868b] cursor-wait'
+                  : 'bg-white text-[#3c4043] hover:bg-[#f8f9fa] hover:text-[#202124]'
+              }`}
+              title="Fetch and reload latest telemetry for all added channels"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingChannels ? 'animate-spin text-[#1a73e8]' : 'text-[#5f6368]'}`} />
+              <span>{isSyncingChannels ? 'Syncing...' : 'Sync All'}</span>
+            </button>
+          )}
 
           {/* Channel Switcher Dropdown */}
           <div className="relative">
@@ -226,7 +248,20 @@ export const Header: React.FC<HeaderProps> = ({
                   })}
                 </div>
 
-                <div className="p-2 border-t border-[#dadce0]">
+                <div className="p-2 border-t border-[#dadce0] space-y-1">
+                  {onSyncAllChannels && (
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onSyncAllChannels();
+                      }}
+                      disabled={isSyncingChannels}
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-[#3c4043] hover:bg-[#f1f3f4] rounded-lg transition-colors"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncingChannels ? 'animate-spin text-[#1a73e8]' : 'text-[#5f6368]'}`} />
+                      <span>{isSyncingChannels ? 'Syncing all data...' : 'Sync All Channels Data'}</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setDropdownOpen(false);

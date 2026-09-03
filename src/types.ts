@@ -178,15 +178,24 @@ export interface ProcessLog {
 }
 
 export interface ApiKeysState {
-  youtubeApiKeyConfigured: boolean;
-  youtubeKeySource: 'env' | 'custom' | 'none';
+  youtubeAnalyticsConnected: boolean;
+  youtubeAnalyticsTokenSource: 'env' | 'custom' | 'oauth' | 'none';
   googleMeetApiKeyConfigured: boolean;
   googleMeetKeySource: 'env' | 'custom' | 'none';
-  youtubeQuotaUnitsUsed: number;
+  youtubeAnalyticsReportsCount: number;
   googleMeetSessionsCount: number;
   isLiveApiMode: boolean;
-  customYoutubeKey?: string;
+  customYoutubeAnalyticsToken?: string;
+  customYoutubeAnalyticsClientId?: string;
+  customYoutubeAnalyticsClientSecret?: string;
   customGoogleMeetKey?: string;
+}
+
+export interface GoogleMeetSessionParticipant {
+  name: string;
+  displayName?: string;
+  joinTime?: string;
+  leaveTime?: string;
 }
 
 export interface GoogleMeetSession {
@@ -199,6 +208,13 @@ export interface GoogleMeetSession {
   channelId?: string;
   channelTitle?: string;
   notes?: string;
+  conferenceRecordId?: string;
+  spaceName?: string;
+  startTime?: string;
+  endTime?: string;
+  participants?: GoogleMeetSessionParticipant[];
+  hasRecording?: boolean;
+  hasTranscript?: boolean;
 }
 
 export interface DashboardFilterState {

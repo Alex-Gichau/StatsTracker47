@@ -1,0 +1,256 @@
+{
+  "settings": {
+    "youtubeAnalyticsToken": "",
+    "youtubeAnalyticsClientId": "",
+    "youtubeAnalyticsClientSecret": "",
+    "googleMeetApiKey": "",
+    "youtubeAnalyticsReportsCount": 0,
+    "meetSessionsCount": 0,
+    "updatedAt": "2026-09-02T03:55:00.000Z"
+  },
+  "channels": [
+    {
+      "id": "pceastandrewsnairobi",
+      "handle": "PCEAStAndrewsNairobi",
+      "title": "PCEAStAndrewsNairobi Channel",
+      "customUrl": "https://youtube.com/@PCEAStAndrewsNairobi",
+      "description": "Official channel for @PCEAStAndrewsNairobi. Creating original video essays, tutorials, and community streams.",
+      "avatarUrl": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+      "bannerUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+      "verified": true,
+      "country": "United States",
+      "joinedDate": "Jan 15, 2021",
+      "category": "Creators & Entertainment",
+      "subscribers": 850000,
+      "subscribersFormatted": "850K",
+      "totalViews": 120000000,
+      "totalViewsFormatted": "120M",
+      "totalVideos": 148,
+      "weeklySubGain": 4200,
+      "weeklyViewGain": 980000,
+      "weeklyWatchTimeGain": 82000,
+      "avgViewsPerVideo": 420000,
+      "avgEngagementRate": 7.2,
+      "avgCtr": 8.9,
+      "history30d": [
+        {
+          "date": "2026-08-04",
+          "subscribers": 838000,
+          "netSubs": 580,
+          "views": 135000,
+          "watchTimeHours": 11000,
+          "engagementRate": 7,
+          "shortsViews": 52000,
+          "longFormViews": 83000
+        },
+        {
+          "date": "2026-08-12",
+          "subscribers": 842000,
+          "netSubs": 620,
+          "views": 142000,
+          "watchTimeHours": 121000,
+          "engagementRate": 7.3,
+          "shortsViews": 56000,
+          "longFormViews": 86000
+        },
+        {
+          "date": "2026-08-20",
+          "subscribers": 846500,
+          "netSubs": 690,
+          "views": 158000,
+          "watchTimeHours": 13500,
+          "engagementRate": 7.5,
+          "shortsViews": 64000,
+          "longFormViews": 94000
+        },
+        {
+          "date": "2026-08-31",
+          "subscribers": 850000,
+          "netSubs": 710,
+          "views": 165000,
+          "watchTimeHours": 14200,
+          "engagementRate": 7.2,
+          "shortsViews": 68000,
+          "longFormViews": 97000
+        }
+      ],
+      "recentVideos": [
+        {
+          "id": "v1",
+          "title": "Why Most Creators Fail in 2026 (And What Works Now)",
+          "publishedAt": "2026-08-30T10:18:55.146Z",
+          "views": 312000,
+          "likes": 24500,
+          "comments": 1840,
+          "duration": "12:45",
+          "thumbnailUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80",
+          "url": "https://youtube.com/watch?v=mock-PCEAStAndrewsNairobi",
+          "type": "long-form",
+          "engagementRate": 8.4,
+          "estimatedCtr": 10.2,
+          "avgPercentageViewed": 62.1,
+          "aiBadge": "Viral Breakout",
+          "aiTakeaway": "Exceptional retention through first 5 minutes due to clear framework layout."
+        }
+      ],
+      "demographics": {
+        "topCountries": [
+          {
+            "country": "United States",
+            "percentage": 38
+          },
+          {
+            "country": "United Kingdom",
+            "percentage": 14
+          },
+          {
+            "country": "Canada",
+            "percentage": 12
+          },
+          {
+            "country": "Germany",
+            "percentage": 9
+          },
+          {
+            "country": "India",
+            "percentage": 8
+          }
+        ],
+        "ageGroups": [
+          {
+            "range": "18-24",
+            "percentage": 32
+          },
+          {
+            "range": "25-34",
+            "percentage": 44
+          },
+          {
+            "range": "35-44",
+            "percentage": 16
+          },
+          {
+            "range": "45+",
+            "percentage": 8
+          }
+        ],
+        "gender": {
+          "male": 68,
+          "female": 28,
+          "other": 4
+        },
+        "trafficSources": [
+          {
+            "source": "Browse Features",
+            "percentage": 42
+          },
+          {
+            "source": "Suggested Videos",
+            "percentage": 35
+          },
+          {
+            "source": "YouTube Search",
+            "percentage": 15
+          },
+          {
+            "source": "External",
+            "percentage": 8
+          }
+        ],
+        "subscribedVsNot": {
+          "subscribed": 33,
+          "notSubscribed": 67
+        }
+      },
+      "uploadHeatmap": [
+        {
+          "day": "Mon",
+          "hour": 17,
+          "score": 85
+        },
+        {
+          "day": "Tue",
+          "hour": 16,
+          "score": 88
+        },
+        {
+          "day": "Wed",
+          "hour": 17,
+          "score": 94
+        },
+        {
+          "day": "Thu",
+          "hour": 16,
+          "score": 92
+        },
+        {
+          "day": "Sat",
+          "hour": 14,
+          "score": 80
+        }
+      ],
+      "nextMilestone": {
+        "targetSubs": 1000000,
+        "targetName": "1 Million Subscribers (Gold Play Button)",
+        "estimatedDaysLeft": 125,
+        "currentProgressPercent": 85
+      }
+    }
+  ],
+  "emailLogs": [],
+  "emailSchedule": {
+    "id": "sched-1",
+    "channelId": "",
+    "recipientEmail": "creator@example.com",
+    "frequency": "WEEKLY",
+    "dayOfWeek": "MONDAY",
+    "timeUtc": "09:00",
+    "format": "rich-html",
+    "includeRecommendations": true,
+    "includeVideoScorecard": true,
+    "alertOnSpikes": true,
+    "spikeThresholdPercent": 20,
+    "isActive": true,
+    "lastSentAt": null,
+    "nextScheduledAt": "2026-09-09T10:52:50.054Z",
+    "enabled": true,
+    "deliveryTime": "08:00",
+    "includeVideoBreakdown": true,
+    "lastRunAt": null,
+    "nextRunAt": null
+  },
+  "systemChanges": [
+    {
+      "id": "sys-1788346380894-buwg",
+      "timestamp": "2026-09-02T10:53:00.894Z",
+      "action": "Channels Batch Saved",
+      "category": "CHANNEL_BATCH_SAVE",
+      "details": "Persisted 1 channels to db.json",
+      "actor": "Dashboard UI"
+    },
+    {
+      "id": "sys-1788346380601-xt4h",
+      "timestamp": "2026-09-02T10:53:00.601Z",
+      "action": "Channels Batch Saved",
+      "category": "CHANNEL_BATCH_SAVE",
+      "details": "Persisted 1 channels to db.json",
+      "actor": "Dashboard UI"
+    },
+    {
+      "id": "sys-1788346380599-uzk2",
+      "timestamp": "2026-09-02T10:53:00.599Z",
+      "action": "Channels Batch Saved",
+      "category": "CHANNEL_BATCH_SAVE",
+      "details": "Persisted 1 channels to db.json",
+      "actor": "Dashboard UI"
+    },
+    {
+      "id": "sys-init-1",
+      "timestamp": "2026-09-02T03:50:00.000Z",
+      "action": "Database Engine Initialized",
+      "category": "DATABASE_INITIALIZATION",
+      "details": "JSON file database store (/db.json) active for persisting system settings, channel records, email schedules, and audit changes.",
+      "actor": "System Admin"
+    }
+  ]
+}
